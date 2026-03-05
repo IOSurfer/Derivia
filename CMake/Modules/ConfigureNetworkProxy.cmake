@@ -1,9 +1,9 @@
 function(configure_network_proxy http_proxy https_proxy)
     if(NOT http_proxy)
-        set(http_proxy "" CACHE STRING "HTTP proxy, e.g., http://127.0.0.1:7890")
+        set(CUSTOM_HTTP_PROXY "" CACHE STRING "HTTP proxy, e.g., http://127.0.0.1:7890")
     endif()
     if(NOT https_proxy)
-        set(https_proxy "" CACHE STRING "HTTPS proxy, e.g., http://127.0.0.1:7890")
+        set(CUSTOM_HTTPS_PROXY "" CACHE STRING "HTTPS proxy, e.g., http://127.0.0.1:7890")
     endif()
 
     if(http_proxy)
