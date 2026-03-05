@@ -66,4 +66,4 @@ set(ep_common_args
 )
 
 include(ConfigureNetworkProxy)
-configure_network_proxy()
+configure_network_proxy(${CUSTOM_HTTP_PROXY} ${CUSTOM_HTTPS_PROXY})

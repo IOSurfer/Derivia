@@ -3,14 +3,14 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from Utils.call_vcvars import call_vcvars
 from Utils.param_manager import ParamManager
+
 
 def main():
     parser = argparse.ArgumentParser(description="Configure Derivia build")
     parser.add_argument("--http-proxy", default="http://127.0.0.1:7890")
     parser.add_argument("--https-proxy", default="http://127.0.0.1:7890")
-    parser.add_argument("--msvc-version", default="1929")
+    # parser.add_argument("--msvc-version", default="1929")
     parser.add_argument("--build-type", default="RelWithDebInfo")
     parser.add_argument("--persist-file", default=None)
     parser.add_argument("--load-params", action="store_true")
@@ -37,30 +37,31 @@ def main():
     build_dir = project_root / "build"
     build_dir.mkdir(exist_ok=True)
 
-    if sys.platform == "win32":
-        vcvars_path = build_dir / "CMakeFiles" / "vcvars64_wrapper.bat"
-        if vcvars_path.exists():
-            call_vcvars(vcvars_path)
-
     cmake_cmd = [
         "cmake",
         "-S", str(project_root),
         "-B", str(build_dir),
         "-G", "Ninja",
-        f"-DVcvars_MSVC_VERSION={args.msvc_version}",
         f"-DCMAKE_BUILD_TYPE={args.build_type}",
         f"-DCUSTOM_HTTP_PROXY={args.http_proxy}",
         f"-DCUSTOM_HTTPS_PROXY={args.https_proxy}",
-        "-DCMAKE_TOOLCHAIN_FILE=" + str(project_root / "CMake/Toolchains/Ninja_MSVC.cmake"),
+        "-DCMAKE_TOOLCHAIN_FILE=" +
+        str(project_root / "CMake/Toolchains/Ninja_MSVC.cmake"),
         '-DCMAKE_CXX_FLAGS=/MP',
         '-DBUILD_TESTING=OFF',
         '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
     ]
 
-    print("Running CMake command:")
-    print(" ".join(map(str, cmake_cmd)))
+    if sys.platform == "win32":
+        vcvars_path = build_dir / "CMakeFiles" / "vcvars64_wrapper.bat"
+        if vcvars_path.exists():
+            cmake_cmd[0] = f'''call "{vcvars_path}" && cmake'''
 
-    result = subprocess.run(cmake_cmd)
+
+    print("Running CMake command:")
+    cmd = " ".join(map(str, cmake_cmd))
+    print(cmd)
+    result = subprocess.run(cmd, shell=True)
     if result.returncode != 0:
         sys.exit(result.returncode)
 
