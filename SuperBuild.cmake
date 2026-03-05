@@ -1,0 +1,2 @@
+include(SetupThirdPartyDirs)
+setup_third_party_dirs()
